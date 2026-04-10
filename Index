@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Money Vault</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#faf8f3;--white:#fff;
+  --forest:#1a6644;--forest-mid:#237a52;--forest-pale:#e6f4ed;--forest-deep:#081f10;
+  --amber:#c8860a;--amber-pale:#fef7e7;--amber-bdr:#f8d78a;
+  --ruby:#bf3b3b;--ruby-pale:#fdeaea;
+  --sky:#1a5fa6;--sky-pale:#e8f1fb;
+  --ink:#1c2419;--sage:#5a7060;--border:#e4ebe0;
+  --sh-sm:0 2px 10px rgba(26,60,30,.08);
+  --sh-lg:0 18px 50px rgba(26,60,30,.18);
+  --r-xl:22px;--r-lg:16px;--r-md:12px;--r-sm:8px;
+}
+html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--cream);color:var(--ink);-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+.svi{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.svi svg{display:block}
+.hdr{background:linear-gradient(160deg,#081f10 0%,#1a6644 52%,#237a52 100%);color:#fff;padding:22px 18px 42px;position:relative;overflow:hidden;border-bottom-left-radius:30px;border-bottom-right-radius:30px;}
+.hdr::before{content:'';position:absolute;top:-70px;right:-70px;width:240px;height:240px;border:55px solid rgba(255,255,255,.04);border-radius:50%}
+.hdr::after{content:'';position:absolute;bottom:-100px;left:-50px;width:280px;height:280px;background:radial-gradient(circle,rgba(46,204,142,.1) 0%,transparent 70%);border-radius:50%}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.hdr-name{font-size:.96em;font-weight:700;opacity:.88;letter-spacing:.2px}
+.bell-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;backdrop-filter:blur(4px);}
+.bell-btn:active{background:rgba(255,255,255,.25)}
+.hdr-bal{text-align:center;margin-top:18px;position:relative;z-index:2}
+.hdr-lbl{font-size:.68em;font-weight:600;opacity:.58;text-transform:uppercase;letter-spacing:2px}
+.hdr-amt{font-family:'Syne',sans-serif;font-size:3.7em;font-weight:800;line-height:1;letter-spacing:-2px;margin-top:4px}
+.hdr-pill{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.17);border-radius:20px;padding:5px 14px;font-size:.72em;font-weight:600;margin-top:12px;backdrop-filter:blur(4px);}
+.pulse-dot{width:7px;height:7px;background:#34d399;border-radius:50%;animation:pdot 2s infinite;flex-shrink:0}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);display:flex;border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -4px 24px rgba(26,60,30,.08);}
+.nb{flex:1;padding:8px 2px;border:none;background:none;cursor:pointer;font-size:.58em;color:var(--sage);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Outfit',sans-serif;font-weight:600;transition:color .18s;}
+.nb-ico{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:transparent;transition:background .18s,transform .18s;color:inherit;}
+.nb.active{color:var(--forest)}
+.nb.active .nb-ico{background:var(--forest-pale);transform:scale(1.08)}
+.content{padding:0 0 96px}
+.tab{display:none}.tab.active{display:block}
+.card{background:var(--white);border-radius:var(--r-xl);padding:20px;margin:14px 14px 0;box-shadow:var(--sh-sm);border:1px solid var(--border);overflow:hidden}
+.ctitle{font-family:'Syne',sans-serif;font-size:.93em;font-weight:700;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:9px;}
+.icon-chip{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.icon-chip.green{background:var(--forest-pale);color:var(--forest)}
+.icon-chip.amber{background:var(--amber-pale);color:var(--amber)}
+.icon-chip.sky{background:var(--sky-pale);color:var(--sky)}
+.icon-chip.ruby{background:var(--ruby-pale);color:var(--ruby)}
+.icon-chip.muted{background:#f0f2f0;color:var(--sage)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 14px 0}
+.sp{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:16px 16px 14px;box-shadow:var(--sh-sm)}
+.sp-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.sp-icon.green{background:var(--forest-pale);color:var(--forest)}
+.sp-icon.amber{background:var(--amber-pale);color:var(--amber)}
+.sp .sl{font-size:.68em;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--sage)}
+.sp .sv{font-family:'Syne',sans-serif;font-size:1.5em;font-weight:800;margin-top:4px}
+.sp.green .sv{color:var(--forest)}.sp.amber .sv{color:var(--amber)}
+.total-bar{background:linear-gradient(135deg,var(--sky),#1e4d8c);color:white;border-radius:var(--r-xl);padding:16px 20px;margin:10px 14px 0;display:flex;justify-content:space-between;align-items:center;box-shadow:0 6px 20px rgba(26,95,166,.22);}
+.total-bar .tl{font-size:.78em;font-weight:600;opacity:.85;display:flex;align-items:center;gap:7px}
+.total-bar .tv{font-family:'Syne',sans-serif;font-size:1.8em;font-weight:800}
+.chart-wrap{background:var(--white);border-radius:var(--r-xl);padding:18px 18px 12px;margin:14px 14px 0;box-shadow:var(--sh-sm);border:1px solid var(--border)}
+.chart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.chart-ttl{font-family:'Syne',sans-serif;font-size:.9em;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.chart-badge{background:var(--forest-pale);color:var(--forest);border-radius:20px;padding:4px 11px;font-size:.72em;font-weight:700}
+#bchart{width:100%;height:130px;display:block;border-radius:var(--r-md);background:var(--cream)}
+.chart-sub{font-size:.7em;color:var(--sage);font-weight:600;text-align:center;margin-top:8px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.73em;font-weight:700;color:var(--sage);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
+.field input,.field select{width:100%;padding:13px 16px;border:2px solid var(--border);border-radius:var(--r-md);font-size:1em;font-family:'Outfit',sans-serif;font-weight:600;color:var(--ink);background:var(--white);transition:border-color .18s,box-shadow .18s;-webkit-appearance:none;outline:none;}
+.field input:focus,.field select:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(26,102,68,.1)}
+.field.big input{font-size:2em;font-weight:800;font-family:'Syne',sans-serif;text-align:center;letter-spacing:-.5px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px;width:100%;overflow:hidden;}
+.ctile{background:var(--cream);border:1.5px solid var(--border);border-radius:var(--r-md);padding:9px 8px;display:flex;align-items:center;gap:7px;transition:border-color .18s;min-width:0;overflow:hidden;}
+.ctile:focus-within{border-color:var(--forest)}
+.ctile.full{grid-column:1/-1}
+.dchip{flex-shrink:0;font-family:'Syne',sans-serif;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;letter-spacing:-.5px;}
+.dchip.coin{width:34px;height:34px;border-radius:50%;font-size:.65em;border:2px solid}
+.dchip.bill{width:38px;height:22px;border-radius:5px;font-size:.6em;border:1.5px solid}
+.dc-penny{background:#fdf3e7;color:#a05a20;border-color:#d4956b}
+.dc-nickel{background:#f0f2f4;color:#5a6570;border-color:#9faab0}
+.dc-dime{background:#f2f4f6;color:#4a5568;border-color:#8a9bb0}
+.dc-quart{background:#fafaf0;color:#7a7020;border-color:#c8b840}
+.dc-dcoin{background:#fef9e7;color:#a08010;border-color:#d4b040}
+.db-1{background:#e8f5ee;color:#1a6644;border-color:#7dc8a4}
+.db-5{background:#eaf0f8;color:#1a5fa6;border-color:#7aaad4}
+.db-10{background:#f0eafa;color:#5a2d91;border-color:#a880d4}
+.db-20{background:#fef3e8;color:#c86a0a;border-color:#e8a870}
+.db-50{background:#fde8e8;color:#a02020;border-color:#e08888}
+.db-100{background:#1a6644;color:#fff;border-color:#1a6644}
+.cmeta{flex:1;min-width:0;overflow:hidden}
+.cmeta .cn{font-weight:700;font-size:.78em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmeta .cv{font-size:.64em;color:var(--sage);font-weight:600;margin-top:1px}
+.ctile input{width:44px;min-width:44px;max-width:44px;padding:7px 2px;border:2px solid var(--border);border-radius:var(--r-sm);text-align:center;font-size:.9em;font-weight:800;font-family:'Outfit',sans-serif;color:var(--ink);background:var(--white);flex-shrink:0;outline:none;transition:border-color .18s;-webkit-appearance:none;}
+.ctile input:focus{border-color:var(--forest)}
+.dep-box{background:linear-gradient(135deg,#081f10,#1a6644);color:white;border-radius:var(--r-lg);padding:20px;text-align:center;margin-bottom:16px;box-shadow:0 6px 20px rgba(26,102,68,.28);}
+.dep-box .dl{font-size:.68em;opacity:.7;text-transform:uppercase;letter-spacing:1.8px;font-weight:700}
+.dep-box .da{font-family:'Syne',sans-serif;font-size:3.1em;font-weight:800;margin-top:4px;letter-spacing:-1px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px 20px;border:none;border-radius:var(--r-md);font-size:.93em;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:transform .12s,opacity .12s;margin-top:10px;}
+.btn:active{transform:scale(.97);opacity:.88}
+.btn-f{background:var(--forest);color:white;box-shadow:0 4px 14px rgba(26,102,68,.3)}
+.btn-r{background:var(--ruby);color:white;box-shadow:0 4px 14px rgba(191,59,59,.28)}
+.btn-a{background:var(--amber);color:white;box-shadow:0 4px 14px rgba(200,134,10,.28)}
+.btn-g{background:var(--cream);color:var(--ink);border:1.5px solid var(--border);box-shadow:none}
+.spend-prev{background:var(--amber-pale);border:1.5px solid var(--amber-bdr);border-radius:var(--r-lg);padding:14px;text-align:center;margin-top:4px}
+.spend-prev .afl{font-size:.7em;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;justify-content:center;gap:5px}
+.spend-prev .afa{font-family:'Syne',sans-serif;font-size:2.2em;font-weight:800;color:var(--ink);margin-top:3px}
+.txn{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--cream)}
+.txn:last-child{border-bottom:none}
+.txn-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.txn-ico.d{background:var(--forest-pale);color:var(--forest)}
+.txn-ico.s{background:var(--ruby-pale);color:var(--ruby)}
+.txn-ico.inv{background:var(--sky-pale);color:var(--sky)}
+.txn-body{flex:1;min-width:0}
+.txn-note{font-weight:700;font-size:.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-cat{font-size:.7em;color:var(--sky);font-weight:600;margin-top:1px}
+.txn-date{font-size:.67em;color:var(--sage);margin-top:2px;font-weight:500}
+.txn-amt{font-family:'Syne',sans-serif;font-weight:800;font-size:.95em;flex-shrink:0}
+.txn-amt.p{color:var(--forest)}.txn-amt.n{color:var(--ruby)}
+.txn-del-btn{display:flex;align-items:center;gap:4px;margin-top:5px;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:.68em;font-weight:700;color:var(--sage);cursor:pointer;font-family:'Outfit',sans-serif;transition:background .15s,color .15s;}
+.txn-del-btn:active{background:var(--ruby-pale);color:var(--ruby);border-color:var(--ruby)}
+.gcard{border-radius:var(--r-xl);padding:20px;margin-bottom:12px;color:white;position:relative;overflow:hidden}
+.gcard-shine{position:absolute;top:-30%;right:-10%;width:60%;height:180%;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.07) 50%,transparent 60%);pointer-events:none}
+.gc-store{font-family:'Syne',sans-serif;font-size:1.15em;font-weight:800}
+.gc-note{font-size:.77em;opacity:.72;margin-top:3px;font-weight:500}
+.gc-brow{display:flex;align-items:flex-end;justify-content:space-between;margin-top:18px}
+.gc-bal{font-family:'Syne',sans-serif;font-size:2.2em;font-weight:800}
+.gc-orig{font-size:.7em;opacity:.65;font-weight:500;margin-bottom:4px}
+.gc-acts{display:flex;gap:8px;margin-top:14px}
+.gcb{flex:1;padding:10px 8px;border:none;border-radius:10px;background:rgba(255,255,255,.2);color:white;font-weight:700;font-family:'Outfit',sans-serif;font-size:.82em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.gcb-del{flex:none;padding:10px 14px;background:rgba(0,0,0,.18)}
+.gct0{background:linear-gradient(145deg,#1a5c3a,#0f3520)}
+.gct1{background:linear-gradient(145deg,#1a4d8c,#0f2e5a)}
+.gct2{background:linear-gradient(145deg,#8c3a1a,#5a2010)}
+.gct3{background:linear-gradient(145deg,#6b3a8c,#3f1f5a)}
+.gct4{background:linear-gradient(145deg,#8c6a1a,#5a420e)}
+.isect{background:var(--white);border-radius:var(--r-xl);padding:20px;margin:14px 14px 0;border:1px solid var(--border);box-shadow:var(--sh-sm)}
+.isect-ttl{font-family:'Syne',sans-serif;font-size:.95em;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+.stock-disp{background:linear-gradient(135deg,#1a6644,#237a52);color:white;border-radius:var(--r-lg);padding:20px;text-align:center;margin-bottom:14px}
+.sd-lbl{font-size:.67em;opacity:.7;text-transform:uppercase;letter-spacing:1.8px;font-weight:700}
+.sd-val{font-family:'Syne',sans-serif;font-size:2.8em;font-weight:800;margin-top:4px;letter-spacing:-1px}
+.sd-upd{display:flex;align-items:center;justify-content:center;gap:5px;font-size:.7em;opacity:.65;margin-top:8px;font-weight:500}
+.stock-nudge{background:var(--amber-pale);border:1.5px solid var(--amber-bdr);border-radius:var(--r-md);padding:13px 14px;margin-bottom:12px;font-size:.8em;font-weight:600;color:#7a4e08;display:flex;align-items:flex-start;gap:10px;line-height:1.5;}
+.btc-disp{background:linear-gradient(135deg,#d97706,#b45309);color:white;border-radius:var(--r-lg);padding:18px;margin-bottom:14px}
+.btc-row{display:flex;justify-content:space-between;align-items:flex-start}
+.btc-lbl{font-size:.68em;opacity:.75;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px}
+.btc-val{font-family:'Syne',sans-serif;font-size:1.9em;font-weight:800}
+.btc-amt-txt{font-family:'Syne',sans-serif;font-size:1.3em;font-weight:800}
+.btc-btm{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.2)}
+.btc-sub{font-size:.73em;opacity:.8;font-weight:600}
+.btc-ref{background:rgba(255,255,255,.22);border:none;border-radius:20px;padding:6px 13px;color:white;font-size:.73em;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;gap:5px;}
+.ptotal{background:linear-gradient(135deg,var(--sky),#1e4d8c);color:white;border-radius:var(--r-xl);padding:18px 20px;margin:14px 14px 0;text-align:center;box-shadow:0 6px 20px rgba(26,95,166,.22)}
+.pt-lbl{font-size:.68em;opacity:.78;text-transform:uppercase;letter-spacing:1.8px;font-weight:700}
+.pt-val{font-family:'Syne',sans-serif;font-size:2.5em;font-weight:800;margin-top:4px;letter-spacing:-.5px}
+.infobox{background:var(--sky-pale);border-radius:var(--r-md);padding:13px 15px;font-size:.79em;font-weight:600;color:#1a3d6b;line-height:1.55;margin:14px 14px 0;display:flex;gap:10px;align-items:flex-start}
+.infobox-icon{flex-shrink:0;color:var(--sky);margin-top:1px}
+.inv-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--cream)}
+.inv-row:last-child{border-bottom:none}
+.inv-row-left{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9em}
+.inv-row-chip{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.inv-row-chip.green{background:var(--forest-pale);color:var(--forest)}
+.inv-row-chip.amber{background:var(--amber-pale);color:var(--amber)}
+.inv-total-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-weight:800;font-family:'Syne',sans-serif}
+.empty{text-align:center;padding:32px 16px;color:var(--sage)}
+.empty-chip{width:52px;height:52px;border-radius:16px;background:var(--cream);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:var(--sage)}
+.empty .et{font-weight:600;font-size:.88em}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;backdrop-filter:blur(2px)}
+.mbg.open{display:flex}
+.msheet{background:var(--white);border-radius:26px 26px 0 0;padding:24px 20px 40px;width:100%;max-height:85vh;overflow-y:auto}
+.mhandle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+#sov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:500;pointer-events:none;background:rgba(8,31,16,0);transition:background .3s}
+#sov.on{background:rgba(8,31,16,.38);pointer-events:auto}
+.sc{background:white;border-radius:30px;padding:40px 50px;text-align:center;box-shadow:var(--sh-lg);position:relative;transform:scale(0) rotate(-10deg);transition:transform .48s cubic-bezier(.34,1.65,.64,1)}
+.sc.show{transform:scale(1) rotate(0deg)}
+.sc-ring{position:absolute;top:50%;left:50%;width:80px;height:80px;border-radius:50%;border:3px solid rgba(26,102,68,.4);transform:translate(-50%,-50%);pointer-events:none}
+.sc-ring.r1{animation:ro .85s ease-out .08s both}
+.sc-ring.r2{animation:ro .85s ease-out .22s both}
+.sc-ring.r3{animation:ro .85s ease-out .38s both}
+@keyframes ro{from{transform:translate(-50%,-50%) scale(1);opacity:.7}to{transform:translate(-50%,-50%) scale(5.5);opacity:0}}
+.sc-check{width:72px;height:72px;border-radius:50%;background:var(--forest-pale);display:flex;align-items:center;justify-content:center;margin:0 auto;color:var(--forest);animation:bi .5s cubic-bezier(.34,1.56,.64,1) .28s both}
+@keyframes bi{from{transform:scale(0)}to{transform:scale(1)}}
+.sc-ttl{font-family:'Syne',sans-serif;font-size:1.5em;font-weight:800;color:var(--forest);margin-top:12px}
+.sc-amt{font-size:.95em;color:var(--sage);font-weight:600;margin-top:6px}
+.float-dot{position:fixed;width:12px;height:12px;border-radius:50%;pointer-events:none;z-index:501;animation:fup 1.8s ease-out forwards}
+@keyframes fup{0%{transform:translateY(0) scale(1);opacity:1}60%{opacity:1}100%{transform:translateY(-180px) scale(.3);opacity:0}}
+.srow{padding:16px 0;border-bottom:1px solid var(--cream)}
+.srow:last-child{border-bottom:none}
+.slbl{font-weight:700;font-size:.9em;margin-bottom:3px;display:flex;align-items:center;gap:7px}
+.ssub{font-size:.76em;color:var(--sage);margin-bottom:10px;line-height:1.5;font-weight:500}
+.danger{color:var(--ruby)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <span class="hdr-name" id="hdrName">My Money Vault</span>
+    <button class="bell-btn" onclick="sendNotif()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+  </div>
+  <div class="hdr-bal">
+    <div class="hdr-lbl">Cash Balance</div>
+    <div class="hdr-amt" id="hdrAmt">$0.00</div>
+    <div class="hdr-pill"><span class="pulse-dot"></span><span>Tap the bell to notify your phone</span></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- HOME -->
+
+  <div id="tab-home" class="tab active">
+    <div class="stat-grid">
+      <div class="sp green">
+        <div class="sp-icon green"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="sl">Cash</div><div class="sv" id="hCash">$0.00</div>
+      </div>
+      <div class="sp amber">
+        <div class="sp-icon amber"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+        <div class="sl">Gift Cards</div><div class="sv" id="hGc">$0.00</div>
+      </div>
+    </div>
+    <div class="total-bar">
+      <span class="tl"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Cash + Gift Cards</span>
+      <span class="tv" id="hTotal">$0.00</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-hdr">
+        <div class="chart-ttl"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a6644" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Balance History</div>
+        <div class="chart-badge" id="chartBadge">$0.00</div>
+      </div>
+      <canvas id="bchart"></canvas>
+      <div class="chart-sub" id="chartSub">Make your first deposit to see your chart grow!</div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><div class="icon-chip sky"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>Investment Summary</div>
+      <div id="hInvest"></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><div class="icon-chip muted"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>Recent Activity</div>
+      <div id="hRecent"></div>
+    </div>
+    <div class="card">
+      <button class="btn btn-f" onclick="sendNotif()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Send My Balance to My Phone</button>
+    </div>
+  </div>
+
+  <!-- DEPOSIT -->
+
+  <div id="tab-deposit" class="tab">
+    <div class="card">
+      <div class="ctitle"><div class="icon-chip green"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>Count Your Money</div>
+      <p style="font-size:.82em;color:var(--sage);font-weight:600;margin-bottom:16px;">Enter how many of each coin or bill you have right now</p>
+      <div class="cgrid">
+        <div class="ctile"><div class="dchip coin dc-penny">1¢</div><div class="cmeta"><div class="cn">Pennies</div><div class="cv">$0.01 each</div></div><input type="number" id="cP" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip coin dc-nickel">5¢</div><div class="cmeta"><div class="cn">Nickels</div><div class="cv">$0.05 each</div></div><input type="number" id="cN" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip coin dc-dime">10¢</div><div class="cmeta"><div class="cn">Dimes</div><div class="cv">$0.10 each</div></div><input type="number" id="cD" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip coin dc-quart">25¢</div><div class="cmeta"><div class="cn">Quarters</div><div class="cv">$0.25 each</div></div><input type="number" id="cQ" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip coin dc-dcoin">$1</div><div class="cmeta"><div class="cn">Dollar Coins</div><div class="cv">$1.00 each</div></div><input type="number" id="cDC" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip bill db-1">$1</div><div class="cmeta"><div class="cn">$1 Bills</div><div class="cv">$1.00 each</div></div><input type="number" id="cB1" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip bill db-5">$5</div><div class="cmeta"><div class="cn">$5 Bills</div><div class="cv">$5.00 each</div></div><input type="number" id="cB5" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip bill db-10">$10</div><div class="cmeta"><div class="cn">$10 Bills</div><div class="cv">$10.00 each</div></div><input type="number" id="cB10" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip bill db-20">$20</div><div class="cmeta"><div class="cn">$20 Bills</div><div class="cv">$20.00 each</div></div><input type="number" id="cB20" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile"><div class="dchip bill db-50">$50</div><div class="cmeta"><div class="cn">$50 Bills</div><div class="cv">$50.00 each</div></div><input type="number" id="cB50" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+        <div class="ctile full"><div class="dchip bill db-100">$100</div><div class="cmeta"><div class="cn">$100 Bills</div><div class="cv">$100.00 each</div></div><input type="number" id="cB100" min="0" value="0" inputmode="numeric" oninput="calcDep()"></div>
+      </div>
+      <div class="dep-box"><div class="dl">Amount to Deposit</div><div class="da" id="depPreview">$0.00</div></div>
+      <div class="field"><label>What's this money from? (optional)</label><input type="text" id="dNote" placeholder="e.g. Birthday money from Grandma"></div>
+      <button class="btn btn-f" onclick="doDeposit()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Add to My Balance</button>
+      <button class="btn btn-g" onclick="clearDep()" style="margin-top:8px;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.3"/></svg>Clear</button>
+    </div>
+  </div>
+
+  <!-- SPEND -->
+
+  <div id="tab-spend" class="tab">
+    <div class="card">
+      <div class="ctitle"><div class="icon-chip ruby"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>Record a Purchase</div>
+      <p style="font-size:.82em;color:var(--sage);font-weight:600;margin-bottom:16px;">Just type how much you spent — no counting needed!</p>
+      <div class="field big"><label>Amount Spent</label><input type="number" id="sAmt" placeholder="0.00" step="0.01" min="0" inputmode="decimal" oninput="upSpend()"></div>
+      <div class="field"><label>What did you buy?</label><input type="text" id="sNote" placeholder="e.g. Roblox, candy, gift for a friend"></div>
+      <div class="field"><label>Category</label>
+        <select id="sCat"><option>Games &amp; Apps</option><option>Food &amp; Snacks</option><option>Gifts</option><option>Clothes</option><option>Books &amp; School</option><option>Hobbies &amp; Fun</option><option>Savings Transfer</option><option>Other</option></select>
+      </div>
+      <div class="spend-prev">
+        <div class="afl"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>Balance after this purchase</div>
+        <div class="afa" id="spendAfter">$0.00</div>
+      </div>
+      <button class="btn btn-r" onclick="doSpend()" style="margin-top:14px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg>Record Purchase</button>
+    </div>
+  </div>
+
+  <!-- GIFT CARDS -->
+
+  <div id="tab-giftcards" class="tab">
+    <div class="card">
+      <div class="ctitle"><div class="icon-chip amber"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>Add a Gift Card</div>
+      <div class="field"><label>Store or Card Type</label><input type="text" id="gcStore" placeholder="e.g. Amazon, Target, Visa Prepaid"></div>
+      <div class="field"><label>Balance on the Card</label><input type="number" id="gcBal" placeholder="0.00" step="0.01" min="0" inputmode="decimal"></div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="gcNote" placeholder="e.g. Christmas from Uncle Mike"></div>
+      <button class="btn btn-a" onclick="addGc()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Gift Card</button>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <div class="ctitle"><div class="icon-chip amber"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>My Gift Cards</div>
+      <div id="gcList"></div>
+    </div>
+  </div>
+
+  <!-- INVEST -->
+
+  <div id="tab-invest" class="tab">
+    <div class="isect">
+      <div class="isect-ttl"><div class="icon-chip green"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>My Stock Portfolio</div>
+      <div class="stock-disp">
+        <div class="sd-lbl">Total Portfolio Value</div>
+        <div class="sd-val" id="stockDisp">$0.00</div>
+        <div class="sd-upd"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="stockUpd">Not updated yet</span></div>
+      </div>
+      <div id="stockNudge" style="display:none;" class="stock-nudge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8860a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div><strong>Have you checked on your stocks lately?</strong><br>It's been a while! Ask your parent for the current balance and enter it below.</div>
+      </div>
+      <div class="field"><label>Enter New Stock Balance — your parent gives you this number</label><input type="number" id="stockInput" placeholder="0.00" step="0.01" min="0" inputmode="decimal"></div>
+      <button class="btn btn-f" style="margin-top:4px;" onclick="updateStock()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.3"/></svg>Update Stock Balance</button>
+    </div>
+    <div class="isect" style="margin-top:14px;">
+      <div class="isect-ttl"><div class="icon-chip amber"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.2L8.29 5.411m5.908 1.042.348-1.97M7.48 20.364l3.126-17.727"/></svg></div>Bitcoin</div>
+      <div class="btc-disp">
+        <div class="btc-row">
+          <div><div class="btc-lbl">Your Bitcoin Value</div><div class="btc-val" id="btcValDisp">$—</div></div>
+          <div style="text-align:right"><div class="btc-lbl">You Own</div><div class="btc-amt-txt" id="btcAmtDisp">0 BTC</div></div>
+        </div>
+        <div class="btc-btm">
+          <div class="btc-sub" id="btcPriceTxt">Loading live price...</div>
+          <button class="btc-ref" onclick="fetchBtc()"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.3"/></svg>Refresh</button>
+        </div>
+      </div>
+      <div class="field"><label>How much Bitcoin do you own? — your parent gives you this number</label><input type="number" id="btcInput" placeholder="e.g. 0.005" step="0.000001" min="0" inputmode="decimal"></div>
+      <button class="btn btn-a" style="margin-top:4px;" onclick="updateBtc()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save My Bitcoin</button>
+    </div>
+    <div class="ptotal"><div class="pt-lbl">Total Investment Portfolio</div><div class="pt-val" id="portTotal">$0.00</div></div>
+    <div class="infobox">
+      <div class="infobox-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+      <div><strong>How this works:</strong> Your parent tells you your stock account total — just type it above. For Bitcoin, enter how many BTC you own and the live price automatically calculates your value! To fix a mistake, just enter the correct number again — it logs as a correction.</div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <div class="ctitle"><div class="icon-chip ruby"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.3"/></svg></div>Reset Investment Data</div>
+      <p style="font-size:.82em;color:var(--sage);font-weight:600;margin-bottom:12px;">Entered the wrong numbers? Reset your investment tracker here. Your cash balance and gift cards are <strong>not</strong> affected.</p>
+      <button class="btn btn-r" onclick="resetInvestments()" style="margin-top:0;"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.3"/></svg>Reset Investment Data</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+
+  <div id="tab-history" class="tab">
+    <div class="card">
+      <div class="ctitle"><div class="icon-chip muted"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>All Transactions</div>
+      <div id="histList"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+
+  <div id="tab-settings" class="tab">
+    <div class="card">
+      <div class="ctitle"><div class="icon-chip muted"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>Settings</div>
+      <div class="srow">
+        <div class="slbl"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Your Name</div>
+        <div class="ssub">Personalizes the app just for you!</div>
+        <div class="field" style="margin:0"><input type="text" id="setName" placeholder="e.g. Emma" oninput="saveSetting('childName',this.value);updateUI()"></div>
+      </div>
+      <div class="srow">
+        <div class="slbl"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Phone Notifications</div>
+        <div class="ssub">Tap the bell anytime to get a notification showing your current balance.</div>
+        <button class="btn btn-f" onclick="reqNotif()" style="margin:0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Enable Notifications</button>
+      </div>
+      <div class="srow">
+        <div class="slbl danger"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ruby)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>Reset Everything</div>
+        <div class="ssub">Permanently deletes all your data. Cannot be undone!</div>
+        <button class="btn btn-r" onclick="clearAll()" style="margin:0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>Delete Everything</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<nav class="nav">
+  <button class="nb active" data-tab="home" onclick="switchTab('home')"><div class="nb-ico"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>Home</button>
+  <button class="nb" data-tab="deposit" onclick="switchTab('deposit')"><div class="nb-ico"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>Deposit</button>
+  <button class="nb" data-tab="spend" onclick="switchTab('spend')"><div class="nb-ico"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>Spend</button>
+  <button class="nb" data-tab="giftcards" onclick="switchTab('giftcards')"><div class="nb-ico"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>Cards</button>
+  <button class="nb" data-tab="invest" onclick="switchTab('invest')"><div class="nb-ico"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>Invest</button>
+  <button class="nb" data-tab="history" onclick="switchTab('history')"><div class="nb-ico"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>History</button>
+  <button class="nb" data-tab="settings" onclick="switchTab('settings')"><div class="nb-ico"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>Settings</button>
+</nav>
+
+<div class="mbg" id="gcModal">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="ctitle" id="gcModalTitle"><div class="icon-chip amber"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>Use Gift Card</div>
+    <div class="field"><label>Amount to Spend</label><input type="number" id="gcUseAmt" placeholder="0.00" step="0.01" inputmode="decimal"></div>
+    <div class="field"><label>What did you buy?</label><input type="text" id="gcUseNote" placeholder="e.g. New book"></div>
+    <button class="btn btn-r" onclick="confirmGcUse()"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Use This Card</button>
+    <button class="btn btn-g" onclick="closeGcModal()" style="margin-top:8px;">Cancel</button>
+  </div>
+</div>
+
+<div id="sov">
+  <div class="sc" id="sc">
+    <div class="sc-ring r1"></div><div class="sc-ring r2"></div><div class="sc-ring r3"></div>
+    <div class="sc-check"><svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="sc-ttl">Money Added!</div>
+    <div class="sc-amt" id="scAmt">+$0.00</div>
+  </div>
+</div>
+
+<script>
+const I={
+  down:`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`,
+  up:`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`,
+  trend:`<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+  btc:`<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893-3.94-.694m5.155-6.2L8.29 5.411m5.908 1.042.348-1.97M7.48 20.364l3.126-17.727"/></svg>`,
+  trash:`<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`,
+  card:`<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+  inbox:`<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>`,
+  bars:`<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  list:`<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+  gift2:`<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>`,
+};
+
+const KEY='moneyVault_v4';
+let S={cashBalance:0,transactions:[],balanceHistory:[],giftCards:[],investments:{stockBalance:0,stockUpdated:null,btcAmount:0,btcUpdated:null,cachedBtcPrice:null,btcPriceAt:null},settings:{childName:'',notificationsEnabled:false}};
+let activeGcId=null,successTimer=null;
+
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+function load(){
+  const raw=localStorage.getItem(KEY);
+  if(raw){try{S=JSON.parse(raw)}catch(e){}}
+  else{
+    const old=localStorage.getItem('moneyVault_v3');
+    if(old){try{const p=JSON.parse(old);S.cashBalance=p.cashBalance||0;S.transactions=(p.transactions||[]).filter(t=>t.type==='deposit'||t.type==='spend');S.balanceHistory=p.balanceHistory||[];S.giftCards=p.giftCards||[];S.settings=p.settings||S.settings;save()}catch(e){}}
+  }
+  if(!S.investments)S.investments={stockBalance:0,stockUpdated:null,btcAmount:0,btcUpdated:null,cachedBtcPrice:null,btcPriceAt:null};
+  if(!S.balanceHistory)S.balanceHistory=[];
+}
+function saveSetting(k,v){S.settings[k]=v;save()}
+
+const fc=c=>'$'+(c/100).toFixed(2);
+const fu=n=>'$'+(+n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fd=iso=>new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const fdf=iso=>new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const daysSince=iso=>iso?(Date.now()-new Date(iso).getTime())/86400000:Infinity;
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  document.querySelector('[data-tab="'+t+'"]').classList.add('active');
+  if(t==='home'){updateHome();drawChart()}
+  if(t==='history')renderHistory();
+  if(t==='giftcards')renderGcs();
+  if(t==='invest')renderInvest();
+  if(t==='spend')upSpend();
+}
+
+function updateUI(){
+  const n=S.settings.childName;
+  document.getElementById('hdrName').textContent=n?n+"'s Money Vault":'My Money Vault';
+  document.getElementById('hdrAmt').textContent=fc(S.cashBalance);
+  updateHome();drawChart();
+}
+function updateHome(){
+  const gt=gcSum();
+  document.getElementById('hCash').textContent=fc(S.cashBalance);
+  document.getElementById('hGc').textContent=fc(gt);
+  document.getElementById('hTotal').textContent=fc(S.cashBalance+gt);
+  document.getElementById('chartBadge').textContent=fc(S.cashBalance);
+  renderHomeRecent();renderHomeInvest();
+}
+
+function renderHomeRecent(){
+  const el=document.getElementById('hRecent');
+  if(!S.transactions.length){el.innerHTML='<div class="empty"><div class="empty-chip">'+I.inbox+'</div><div class="et">No transactions yet — start adding your money!</div></div>';return}
+  el.innerHTML=S.transactions.slice(0,5).map(t=>txnHTML(t,false)).join('');
+}
+
+function txnHTML(t,showDelete){
+  if(t.type==='invest-stock'||t.type==='invest-btc'){
+    const isBtc=t.type==='invest-btc';
+    const del=showDelete?'<br><button class="txn-del-btn" onclick="deleteTransaction('+t.id+')">'+I.trash+' Delete</button>':'';
+    return '<div class="txn"><div class="txn-ico inv">'+(isBtc?I.btc:I.trend)+'</div><div class="txn-body"><div class="txn-note">'+esc(t.note)+'</div>'+(t.correction?'<div class="txn-cat" style="color:var(--amber)">Correction entry</div>':'')+'<div class="txn-date">'+fdf(t.date)+'</div></div><div class="txn-amt" style="color:var(--sky);font-size:.85em;text-align:right;flex-shrink:0">'+esc(t.value)+del+'</div></div>';
+  }
+  const p=t.type==='deposit';
+  const del=showDelete?'<br><button class="txn-del-btn" onclick="deleteTransaction('+t.id+')">'+I.trash+' Delete</button>':'';
+  return '<div class="txn"><div class="txn-ico '+(p?'d':'s')+'">'+(p?I.down:I.up)+'</div><div class="txn-body"><div class="txn-note">'+esc(t.note)+'</div>'+(t.cat?'<div class="txn-cat">'+esc(t.cat)+'</div>':'')+'<div class="txn-date">'+fdf(t.date)+'</div></div><div class="txn-amt '+(p?'p':'n')+'" style="text-align:right;flex-shrink:0">'+(p?'+':'-')+fc(t.amount)+del+'</div></div>';
+}
+
+function renderHomeInvest(){
+  const el=document.getElementById('hInvest');
+  const inv=S.investments;
+  const bv=(inv.btcAmount&&inv.cachedBtcPrice)?inv.btcAmount*inv.cachedBtcPrice:0;
+  const sv=inv.stockBalance/100,tot=sv+bv;
+  if(!inv.stockBalance&&!inv.btcAmount){el.innerHTML='<div class="empty"><div class="empty-chip">'+I.bars+'</div><div class="et">No investments added yet</div></div>';return}
+  let rows='';
+  if(inv.stockBalance)rows+='<div class="inv-row"><div class="inv-row-left"><div class="inv-row-chip green">'+I.trend+'</div>Stock Portfolio</div><div class="inv-row-val" style="color:var(--forest)">'+fc(inv.stockBalance)+'</div></div>';
+  if(inv.btcAmount)rows+='<div class="inv-row"><div class="inv-row-left"><div class="inv-row-chip amber">'+I.btc+'</div>Bitcoin ('+inv.btcAmount+' BTC)</div><div class="inv-row-val" style="color:var(--amber)">'+(bv?fu(bv):'—')+'</div></div>';
+  rows+='<div class="inv-total-row"><span>Total Investments</span><span style="color:var(--sky)">'+(tot>0?fu(tot):'—')+'</span></div>';
+  el.innerHTML=rows;
+}
+
+function pushHistory(bal){S.balanceHistory.push({date:new Date().toISOString(),balance:bal});if(S.balanceHistory.length>120)S.balanceHistory=S.balanceHistory.slice(-120)}
+function drawChart(){
+  const cv=document.getElementById('bchart');if(!cv)return;
+  const dpr=window.devicePixelRatio||1,rect=cv.getBoundingClientRect();if(!rect.width)return;
+  cv.width=rect.width*dpr;cv.height=rect.height*dpr;
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  const W=rect.width,H=rect.height,data=S.balanceHistory;
+  ctx.fillStyle='#f0f7f3';rrect(ctx,0,0,W,H,10);ctx.fill();
+  if(data.length<2){ctx.fillStyle='#9ab8a5';ctx.font='600 13px Outfit,sans-serif';ctx.textAlign='center';ctx.fillText('Make your first deposit to see your chart grow!',W/2,H/2+4);document.getElementById('chartSub').style.display='block';return}
+  document.getElementById('chartSub').style.display='none';
+  const pad={t:28,r:22,b:26,l:22},cW=W-pad.l-pad.r,cH=H-pad.t-pad.b;
+  const bals=data.map(d=>d.balance),minB=Math.min(...bals),maxB=Math.max(...bals),rng=(maxB-minB)||1;
+  const pts=data.map((d,i)=>({x:pad.l+(i/(data.length-1))*cW,y:pad.t+cH-((d.balance-minB)/rng)*cH,b:d.balance,d:d.date}));
+  ctx.strokeStyle='rgba(26,102,68,.07)';ctx.lineWidth=1;
+  for(let i=0;i<=3;i++){const y=pad.t+(cH/3)*i;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke()}
+  const g=ctx.createLinearGradient(0,pad.t,0,pad.t+cH);g.addColorStop(0,'rgba(26,102,68,.2)');g.addColorStop(.7,'rgba(26,102,68,.04)');g.addColorStop(1,'rgba(26,102,68,0)');
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cp=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cp,pts[i-1].y,cp,pts[i].y,pts[i].x,pts[i].y)}
+  const lp=pts[pts.length-1];ctx.lineTo(lp.x,pad.t+cH);ctx.lineTo(pts[0].x,pad.t+cH);ctx.closePath();ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cp=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cp,pts[i-1].y,cp,pts[i].y,pts[i].x,pts[i].y)}
+  ctx.strokeStyle='#1a6644';ctx.lineWidth=2.5;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+  pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,4.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.strokeStyle='#1a6644';ctx.lineWidth=2;ctx.stroke()});
+  ctx.font='700 11px Outfit,sans-serif';ctx.fillStyle='#1a6644';ctx.textAlign='left';ctx.fillText(fc(pts[0].b),pts[0].x,pts[0].y-9);
+  ctx.textAlign=lp.x>W*.65?'right':'left';ctx.fillText(fc(lp.b),lp.x,lp.y-9);
+  ctx.font='500 10px Outfit,sans-serif';ctx.fillStyle='#9ab8a5';ctx.textAlign='left';ctx.fillText(fd(data[0].date),pad.l,H-6);ctx.textAlign='right';ctx.fillText(fd(data[data.length-1].date),W-pad.r,H-6);
+}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath()}
+
+const DENOMS=[{id:'cP',v:1},{id:'cN',v:5},{id:'cD',v:10},{id:'cQ',v:25},{id:'cDC',v:100},{id:'cB1',v:100},{id:'cB5',v:500},{id:'cB10',v:1000},{id:'cB20',v:2000},{id:'cB50',v:5000},{id:'cB100',v:10000}];
+function calcDep(){const t=DENOMS.reduce((s,d)=>s+(parseInt(document.getElementById(d.id).value)||0)*d.v,0);document.getElementById('depPreview').textContent=fc(t);return t}
+function doDeposit(){const amt=calcDep();if(amt<=0){alert('Count at least some money first!');return}const note=document.getElementById('dNote').value.trim()||'Deposit';S.cashBalance+=amt;S.transactions.unshift({id:Date.now(),date:new Date().toISOString(),type:'deposit',amount:amt,note});pushHistory(S.cashBalance);save();updateUI();clearDep();showSuccess(amt)}
+function clearDep(){DENOMS.forEach(d=>document.getElementById(d.id).value=0);document.getElementById('dNote').value='';document.getElementById('depPreview').textContent='$0.00'}
+
+function upSpend(){const n=parseFloat(document.getElementById('sAmt').value)||0,after=S.cashBalance-Math.round(n*100),el=document.getElementById('spendAfter');el.textContent=fc(Math.max(0,after));el.style.color=after<0?'var(--ruby)':'var(--ink)'}
+function doSpend(){const amt=Math.round((parseFloat(document.getElementById('sAmt').value)||0)*100),note=document.getElementById('sNote').value.trim(),cat=document.getElementById('sCat').value;if(!amt||amt<=0){alert('How much did you spend?');return}if(!note){alert('What did you buy?');return}if(amt>S.cashBalance&&!confirm("You don't have enough cash! Record it anyway?"))return;S.cashBalance=Math.max(0,S.cashBalance-amt);S.transactions.unshift({id:Date.now(),date:new Date().toISOString(),type:'spend',amount:amt,note,cat});pushHistory(S.cashBalance);save();updateUI();document.getElementById('sAmt').value='';document.getElementById('sNote').value='';upSpend();alert('Recorded! '+note+' — '+fc(amt))}
+
+const GCT=['gct0','gct1','gct2','gct3','gct4'];
+function gcSum(){return S.giftCards.reduce((s,g)=>s+g.balance,0)}
+function addGc(){const store=document.getElementById('gcStore').value.trim(),bal=Math.round(parseFloat(document.getElementById('gcBal').value)*100),note=document.getElementById('gcNote').value.trim();if(!store){alert('What store is the gift card for?');return}if(!bal||bal<=0){alert('Enter the balance on the card!');return}S.giftCards.push({id:Date.now(),store,balance:bal,originalBalance:bal,note,addedDate:new Date().toISOString(),txns:[]});save();updateUI();['gcStore','gcBal','gcNote'].forEach(id=>document.getElementById(id).value='');renderGcs()}
+function renderGcs(){const el=document.getElementById('gcList');if(!S.giftCards.length){el.innerHTML='<div class="empty"><div class="empty-chip">'+I.gift2+'</div><div class="et">No gift cards yet</div></div>';return}el.innerHTML=S.giftCards.map((gc,i)=>{const pct=Math.round((gc.balance/gc.originalBalance)*100);return '<div class="gcard '+GCT[i%GCT.length]+'"><div class="gcard-shine"></div><div class="gc-store">'+esc(gc.store)+'</div>'+(gc.note?'<div class="gc-note">'+esc(gc.note)+'</div>':'')+'<div class="gc-brow"><div class="gc-bal">'+fc(gc.balance)+'</div><div class="gc-orig">'+pct+'% of '+fc(gc.originalBalance)+' left</div></div><div class="gc-acts"><button class="gcb" onclick="openGcModal('+gc.id+')">'+I.card+' Use Card</button><button class="gcb gcb-del" onclick="removeGc('+gc.id+')">'+I.trash+'</button></div></div>'}).join('')}
+function openGcModal(id){activeGcId=id;const gc=S.giftCards.find(g=>g.id===id);document.getElementById('gcModalTitle').innerHTML='<div class="icon-chip amber">'+I.card+'</div>Use '+esc(gc.store)+' ('+fc(gc.balance)+' left)';document.getElementById('gcUseAmt').value='';document.getElementById('gcUseNote').value='';document.getElementById('gcModal').classList.add('open')}
+function closeGcModal(){document.getElementById('gcModal').classList.remove('open');activeGcId=null}
+function confirmGcUse(){const amt=Math.round(parseFloat(document.getElementById('gcUseAmt').value)*100),note=document.getElementById('gcUseNote').value.trim()||'Purchase',gc=S.giftCards.find(g=>g.id===activeGcId);if(!gc)return;if(!amt||amt<=0){alert('Enter an amount!');return}if(amt>gc.balance){alert('You only have '+fc(gc.balance)+' left!');return}gc.balance-=amt;gc.txns.push({date:new Date().toISOString(),amount:amt,note});save();updateUI();renderGcs();closeGcModal();alert('Used '+fc(amt)+' from your '+gc.store+' card!')}
+function removeGc(id){if(!confirm('Remove this gift card?'))return;S.giftCards=S.giftCards.filter(g=>g.id!==id);save();updateUI();renderGcs()}
+
+function updateStock(){const raw=parseFloat(document.getElementById('stockInput').value);if(isNaN(raw)||raw<0){alert('Enter a valid dollar amount!');return}const oldVal=S.investments.stockBalance,newVal=Math.round(raw*100),isC=oldVal>0&&newVal!==oldVal;S.investments.stockBalance=newVal;S.investments.stockUpdated=new Date().toISOString();S.transactions.unshift({id:Date.now(),date:new Date().toISOString(),type:'invest-stock',note:isC?'Stock balance corrected':'Stock portfolio balance updated',value:fc(newVal),correction:isC,prevValue:isC?fc(oldVal):null});document.getElementById('stockInput').value='';save();renderInvest();renderHomeInvest();renderHistory()}
+function updateBtc(){const raw=parseFloat(document.getElementById('btcInput').value);if(isNaN(raw)||raw<0){alert('Enter a valid BTC amount!');return}const oldAmt=S.investments.btcAmount,isC=oldAmt>0&&raw!==oldAmt;S.investments.btcAmount=raw;S.investments.btcUpdated=new Date().toISOString();S.transactions.unshift({id:Date.now(),date:new Date().toISOString(),type:'invest-btc',note:isC?'Bitcoin amount corrected':'Bitcoin added to tracker',value:raw+' BTC',correction:isC,prevValue:isC?oldAmt+' BTC':null});document.getElementById('btcInput').value='';save();renderHistory();fetchBtc()}
+
+async function fetchBtc(){
+  const txt=document.getElementById('btcPriceTxt');if(txt)txt.textContent='Loading live BTC price...';
+  const apis=[
+    async()=>{const r=await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot');if(!r.ok)throw 0;const d=await r.json();const p=parseFloat(d?.data?.amount);if(!p||p<=0)throw 0;return p},
+    async()=>{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');if(!r.ok)throw 0;const d=await r.json();const p=+d?.bitcoin?.usd;if(!p||p<=0)throw 0;return p},
+    async()=>{const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');if(!r.ok)throw 0;const d=await r.json();const p=parseFloat(d?.price);if(!p||p<=0)throw 0;return p},
+    async()=>{const r=await fetch('https://api.kraken.com/0/public/Ticker?pair=XBTUSD');if(!r.ok)throw 0;const d=await r.json();const p=parseFloat(d?.result?.XXBTZUSD?.c?.[0]);if(!p||p<=0)throw 0;return p},
+  ];
+  let price=null;
+  for(const api of apis){try{price=await new Promise((res,rej)=>{const t=setTimeout(()=>rej(0),7000);api().then(p=>{clearTimeout(t);res(p)}).catch(e=>{clearTimeout(t);rej(e)})});if(price&&price>0)break}catch(e){price=null}}
+  if(price&&price>0){S.investments.cachedBtcPrice=price;S.investments.btcPriceAt=new Date().toISOString();save()}
+  renderInvest();renderHomeInvest();
+}
+
+function resetInvestments(){if(!confirm('Reset all investment data? Cash and gift cards are NOT affected.'))return;S.investments={stockBalance:0,stockUpdated:null,btcAmount:0,btcUpdated:null,cachedBtcPrice:null,btcPriceAt:null};S.transactions=S.transactions.filter(t=>t.type!=='invest-stock'&&t.type!=='invest-btc');save();renderInvest();renderHomeInvest();renderHistory();alert('Investment data has been reset.')}
+
+function renderInvest(){
+  const inv=S.investments;
+  document.getElementById('stockDisp').textContent=fc(inv.stockBalance);
+  document.getElementById('stockUpd').textContent=inv.stockUpdated?'Last updated: '+fd(inv.stockUpdated):'Not set yet — ask your parent!';
+  document.getElementById('stockNudge').style.display=daysSince(inv.stockUpdated)>7?'flex':'none';
+  const si=document.getElementById('stockInput');if(si&&!si.value&&inv.stockBalance)si.placeholder=(inv.stockBalance/100).toFixed(2)+' (current)';
+  const price=inv.cachedBtcPrice,bv=(inv.btcAmount&&price)?inv.btcAmount*price:0;
+  document.getElementById('btcAmtDisp').textContent=inv.btcAmount?inv.btcAmount+' BTC':'0 BTC';
+  document.getElementById('btcValDisp').textContent=bv?fu(bv):'$—';
+  const bi=document.getElementById('btcInput');if(bi&&!bi.value&&inv.btcAmount)bi.placeholder=inv.btcAmount+' (current)';
+  document.getElementById('btcPriceTxt').textContent=price?'1 BTC = '+fu(price)+'  ·  '+fd(inv.btcPriceAt):'Tap Refresh to load live price';
+  const tot=(inv.stockBalance/100)+bv;document.getElementById('portTotal').textContent=tot>0?fu(tot):'$0.00';
+}
+
+function renderHistory(){const el=document.getElementById('histList');if(!S.transactions.length){el.innerHTML='<div class="empty"><div class="empty-chip">'+I.list+'</div><div class="et">No transactions yet</div></div>';return}el.innerHTML=S.transactions.map(t=>txnHTML(t,true)).join('')}
+function deleteTransaction(id){const t=S.transactions.find(x=>x.id===id);if(!t)return;if(!confirm('Remove "'+( t.note||t.type)+'" from history?'))return;S.transactions=S.transactions.filter(x=>x.id!==id);save();renderHistory();renderHomeRecent()}
+
+async function reqNotif(){if(!('Notification'in window)){alert("This browser doesn't support notifications.");return}const p=await Notification.requestPermission();if(p==='granted'){S.settings.notificationsEnabled=true;save();new Notification('Money Vault',{body:"You're set! Tap the bell icon anytime."});alert('Notifications enabled!')}else alert('Notifications blocked. Enable them in your device settings.')}
+function sendNotif(){const n=S.settings.childName||'My',gt=gcSum(),body='Cash: '+fc(S.cashBalance)+(gt>0?'  ·  Gift Cards: '+fc(gt):'')+' · Total: '+fc(S.cashBalance+gt);if(!('Notification'in window)){alert(body);return}if(Notification.permission==='granted')new Notification(n+"'s Balance",{body});else if(Notification.permission!=='denied')Notification.requestPermission().then(p=>{if(p==='granted')new Notification(n+"'s Balance",{body})});else alert(n+"'s Balance:\n"+body)}
+
+function clearAll(){if(!confirm('Delete ALL data? Cannot be undone!')||!confirm('Last chance — really delete everything?'))return;localStorage.removeItem(KEY);localStorage.removeItem('moneyVault_v3');S={cashBalance:0,transactions:[],balanceHistory:[],giftCards:[],investments:{stockBalance:0,stockUpdated:null,btcAmount:0,btcUpdated:null,cachedBtcPrice:null,btcPriceAt:null},settings:{childName:'',notificationsEnabled:false}};updateUI();renderGcs();renderHistory();renderInvest();alert('All data cleared.')}
+
+function showSuccess(cents){document.getElementById('scAmt').textContent='+'+fc(cents)+' added to your balance!';const ov=document.getElementById('sov'),sc=document.getElementById('sc');ov.classList.add('on');requestAnimationFrame(()=>requestAnimationFrame(()=>sc.classList.add('show')));const cx=window.innerWidth/2,cy=window.innerHeight/2;['#1a6644','#c8860a','#1a5fa6','#237a52','#bf3b3b'].forEach((c,i)=>{const el=document.createElement('div');el.className='float-dot';el.style.cssText='background:'+c+';left:'+(cx+(i-2)*40+(Math.random()-.5)*20)+'px;top:'+cy+'px;animation-delay:'+(i*70)+'ms';document.body.appendChild(el);setTimeout(()=>el.remove(),2000+i*70)});clearTimeout(successTimer);successTimer=setTimeout(()=>{sc.classList.remove('show');ov.classList.remove('on')},2900)}
+
+document.getElementById('gcModal').addEventListener('click',function(e){if(e.target===this)closeGcModal()});
+load();
+if(S.settings.childName)document.getElementById('setName').value=S.settings.childName;
+updateUI();renderGcs();renderHistory();renderInvest();fetchBtc();
+window.addEventListener('resize',()=>{if(document.getElementById('tab-home').classList.contains('active'))drawChart()});
+</script>
+
+</body>
+</html>
